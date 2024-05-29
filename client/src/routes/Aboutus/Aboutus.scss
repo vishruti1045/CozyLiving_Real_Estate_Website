@@ -1,0 +1,48 @@
+
+.about-page-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding-right: 340px;
+    //margin: 100px;
+   // color: rgb(143, 40, 6);
+     background-size: cover;
+     background-image: url("/about.png");
+    background-repeat: no-repeat;
+  
+}
+.about-container {
+    padding: 50px;
+    margin: 10px;
+    width: 700px;
+    height: 300px;
+    // border: 5px solid rgb(88, 89, 88);
+   
+    box-shadow: 0 4px 8px ;
+   background-color: rgb(192, 85, 56);
+   color:wheat;
+   border-radius: 15px;
+  }
+
+
+  h1{
+    color: bisque;
+}
+  .about-container h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  .about-container li {
+    font-size: 20px;
+    color: white;
+    margin-bottom: 10px;
+  }
+  
+ 
+
+  ul.a{
+    list-style-type: square;
+    //font-size: px;
+    //line-height: 1.5;
+  }
