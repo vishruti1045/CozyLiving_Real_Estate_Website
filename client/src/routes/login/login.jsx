@@ -4,11 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 import apiRequest from "../../lib/apiRequest";
 import { AuthContext } from "../../context/AuthContext";
 
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
 function Login() {
+  const MySwal = withReactContent(Swal);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const {updateUser} = useContext(AuthContext)
+  const { updateUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
@@ -27,15 +31,24 @@ function Login() {
         password,
       });
 
-      updateUser(res.data)
-
+      updateUser(res.data);
       navigate("/");
+      MySwal.fire({
+        title: <p>Login Successful!</p>,
+        icon: 'success'
+      });
     } catch (err) {
       setError(err.response.data.message);
+      MySwal.fire({
+        title: <p>OOPS !!</p>,
+        text: err.response.data.message,
+        icon: 'error'
+      });
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="login">
       <div className="formContainer">
@@ -55,7 +68,7 @@ function Login() {
             required
             placeholder="Password"
           />
-          <button disabled={isLoading}>Login</button>
+          <button type="submit">Login</button>
           {error && <span>{error}</span>}
           <Link to="/register">{"Don't"} you have an account?</Link>
         </form>
@@ -65,6 +78,6 @@ function Login() {
       </div>
     </div>
   );
-}
+};
 
 export default Login;

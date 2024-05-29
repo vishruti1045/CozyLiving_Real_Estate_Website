@@ -1,34 +1,65 @@
 import "./singlePage.scss";
 import Slider from "../../components/slider/Slider";
 import Map from "../../components/map/Map";
-import { useNavigate, useLoaderData } from "react-router-dom";
+import { useNavigate,useLoaderData } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import apiRequest from "../../lib/apiRequest";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
 
 function SinglePage() {
+  const MySwal = withReactContent(Swal);
   const post = useLoaderData();
   const [saved, setSaved] = useState(post.isSaved);
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
+//const email=post.user.email;
+
   const handleSave = async () => {
     if (!currentUser) {
       navigate("/login");
+      return;
     }
-    // AFTER REACT 19 UPDATE TO USEOPTIMISTIK HOOK
     setSaved((prev) => !prev);
     try {
+      console.log("Payload:", { postId: post.id });  // Log the payload
       await apiRequest.post("/users/save", { postId: post.id });
+      MySwal.fire({
+        title: saved ? "Place Unsaved" : "Place Saved",
+        icon: "success",
+      });
     } catch (err) {
-      console.log(err);
+     // console.log("Error:", err.response.data);  // Log the error response
       setSaved((prev) => !prev);
+     
     }
   };
-
-
   
+  const handlegive = async () => {
+    MySwal.fire({
+      title: <p>Owner's Details :-</p>,
+      html: `<p>Username:  ${post.user.username}</p><p>Email:  ${post.user.username}@gmail.com</p><p>Phone number:  1234567890</p>`,
+      icon: 'info'
+    });
+
+   };
+const handledone = async () => {
+
+   
+    MySwal.fire({
+      title: 'Congratulations!!',
+      html: `<p>${post.property} is ready to be sold.</p><p>Complete the further payment process.</p>`,
+      icon: 'success',
+    });
+
+  // window.location.href = '/payment';
+
+};
+
   return (
     <div className="singlePage">
       <div className="details">
@@ -36,6 +67,7 @@ function SinglePage() {
           <Slider images={post.images} />
           <div className="info">
             <div className="top">
+             
               <div className="post">
                 <h1>{post.title}</h1>
                 <div className="address">
@@ -43,10 +75,14 @@ function SinglePage() {
                   <span>{post.address}</span>
                 </div>
                 <div className="price">$ {post.price}</div>
+                <button onClick={handlegive} className="sell">Contact</button>
+                <button onClick={handledone} className="done">{post.type}</button>
+                
               </div>
               <div className="user">
                 <img src={post.user.avatar || "noavatar.png"} alt="" />
                 <span>{post.user.username}</span>
+              
               </div>
             </div>
             <div
@@ -159,6 +195,6 @@ function SinglePage() {
       </div>
     </div>
   );
-}
+};
 
 export default SinglePage;
