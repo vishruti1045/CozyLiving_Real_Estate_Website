@@ -59,6 +59,69 @@ const handledone = async () => {
   // window.location.href = '/payment';
 
 };
+const handlepay = async () => {
+  const propertyType = post.type.toLowerCase(); // Convert to lowercase to ensure case-insensitivity
+  let htmlContent;
+
+  if (propertyType === "buy") {
+    htmlContent = '<p>Your total is:- $' + post.price + '</p>';
+  } else {
+    htmlContent = '<p>Your total per month is:- $' + post.price + '</p>';
+  }
+
+  MySwal.fire({
+    title: 'Payment Successful !!',
+    html: htmlContent,
+    icon: 'success',
+  });
+};
+
+const handlemsg = async () => {
+  MySwal.fire({
+    title: "Send a Message",
+    input: "textarea",
+    inputPlaceholder: "Type your message here...",
+    showCancelButton: true,
+    confirmButtonText: "Send",
+    preConfirm: (text) => {
+      if (!text) {
+        Swal.showValidationMessage("Message cannot be empty");
+      }
+      return text;
+    },
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await apiRequest.post(
+          "/messages/" + post.user.id, // Assuming post.id is the chatId
+          {
+            text: result.value,
+            receiverId: post.user.id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${currentUser.token}`, // Ensure token is available in currentUser
+            },
+          }
+        );
+        
+        MySwal.fire({
+          title: "Message Sent",
+          text: "Your message has been sent to the owner.",
+          icon: "success",
+        });
+      } catch (err) {
+        console.error("Error sending message:", err.response || err);
+        MySwal.fire({
+          title: "Error",
+          text: "There was an error sending your message.",
+          icon: "error",
+        });
+      }
+    }
+  });
+};
+
 
   return (
     <div className="singlePage">
@@ -77,7 +140,8 @@ const handledone = async () => {
                 <div className="price">$ {post.price}</div>
                 <button onClick={handlegive} className="sell">Contact</button>
                 <button onClick={handledone} className="done">{post.type}</button>
-                
+                <button onClick={handlepay} className="done">Payment</button>
+
               </div>
               <div className="user">
                 <img src={post.user.avatar || "noavatar.png"} alt="" />
@@ -177,7 +241,7 @@ const handledone = async () => {
             <Map items={[post]} />
           </div>
           <div className="buttons">
-            <button>
+            <button onClick={handlemsg}>
               <img src="/chat.png" alt="" />
               Send a Message
             </button>

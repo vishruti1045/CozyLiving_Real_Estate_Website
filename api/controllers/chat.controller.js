@@ -12,8 +12,16 @@ export const getChats = async (req, res) => {
       },
     });
 
+    // Add a new array to hold the updated chat objects
+    const updatedChats = [];
+
     for (const chat of chats) {
       const receiverId = chat.userIDs.find((id) => id !== tokenUserId);
+
+      if (!receiverId) {
+        console.error('Receiver ID is undefined.');
+        continue;  // Skip this chat if no valid receiverId
+      }
 
       const receiver = await prisma.user.findUnique({
         where: {
@@ -25,10 +33,23 @@ export const getChats = async (req, res) => {
           avatar: true,
         },
       });
-      chat.receiver = receiver;
+
+      // Ensure receiver exists
+      if (receiver) {
+        // Create a new chat object with the receiver included
+        const chatWithReceiver = {
+          ...chat,
+          receiver,
+        };
+
+        // Add the new chat object to the updatedChats array
+        updatedChats.push(chatWithReceiver);
+      } else {
+        console.error(`Receiver with ID ${receiverId} not found.`);
+      }
     }
 
-    res.status(200).json(chats);
+    res.status(200).json(updatedChats);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to get chats!" });
@@ -61,7 +82,7 @@ export const getChat = async (req, res) => {
       },
       data: {
         seenBy: {
-          push: [tokenUserId],
+          push: tokenUserId,
         },
       },
     });
@@ -90,7 +111,6 @@ export const addChat = async (req, res) => {
 export const readChat = async (req, res) => {
   const tokenUserId = req.userId;
 
-  
   try {
     const chat = await prisma.chat.update({
       where: {

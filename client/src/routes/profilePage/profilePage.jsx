@@ -3,7 +3,7 @@ import List from "../../components/list/List";
 import "./profilePage.scss";
 import apiRequest from "../../lib/apiRequest";
 import { Await, Link, useLoaderData, useNavigate } from "react-router-dom";
-import { Suspense, useContext, useState } from "react"; // Import useState
+import { Suspense, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
 function ProfilePage() {
@@ -12,19 +12,6 @@ function ProfilePage() {
   const { updateUser, currentUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
-  
-  // Add state to track saved posts
-  const [savedPosts, setSavedPosts] = useState([]);
-
-  const handleSavePost = async (postId) => {
-    try {
-      await apiRequest.post(`/posts/${postId}/save`);
-      // Update savedPosts state with the newly saved post
-      setSavedPosts([...savedPosts, postId]);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -35,7 +22,6 @@ function ProfilePage() {
       console.log(err);
     }
   };
-
   return (
     <div className="profilePage">
       <div className="details">
@@ -49,7 +35,7 @@ function ProfilePage() {
           <div className="info">
             <span>
               Avatar:
-              <img src={currentUser.avatar || "noavatar.png"} alt="" />
+              <img src={currentUser.avatar || "noavatar.jpg"} alt="" />
             </span>
             <span>
               Username: <b>{currentUser.username}</b>
@@ -70,14 +56,7 @@ function ProfilePage() {
               resolve={data.postResponse}
               errorElement={<p>Error loading posts!</p>}
             >
-              {(postResponse) => (
-                <List 
-                  posts={postResponse.data.userPosts} 
-                  // Pass handleSavePost function to List component
-                  onSavePost={handleSavePost}
-                  savedPosts={savedPosts} // Pass savedPosts state to List component
-                />
-              )}
+              {(postResponse) => <List posts={postResponse.data.userPosts} />}
             </Await>
           </Suspense>
           <div className="title">
@@ -88,14 +67,7 @@ function ProfilePage() {
               resolve={data.postResponse}
               errorElement={<p>Error loading posts!</p>}
             >
-              {(postResponse) => (
-                <List 
-                  posts={postResponse.data.savedPosts} 
-                  // Pass handleSavePost function to List component
-                  onSavePost={handleSavePost}
-                  savedPosts={savedPosts} // Pass savedPosts state to List component
-                />
-              )}
+              {(postResponse) => <List posts={postResponse.data.savedPosts} />}
             </Await>
           </Suspense>
         </div>
@@ -107,7 +79,7 @@ function ProfilePage() {
               resolve={data.chatResponse}
               errorElement={<p>Error loading chats!</p>}
             >
-              {(chatResponse) => <Chat chats={chatResponse.data} />}
+              {(chatResponse) => <Chat chats={chatResponse.data}/>}
             </Await>
           </Suspense>
         </div>
