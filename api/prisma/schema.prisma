@@ -81,6 +81,8 @@ model User {
   savedPosts SavedPost[]
   chats      Chat[]      @relation(fields: [chatIDs], references: [id])
   chatIDs    String[]    @db.ObjectId
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
 }
 
 model Chat {
@@ -100,4 +102,12 @@ model Message {
   chat      Chat     @relation(fields: [chatId], references: [id])
   chatId    String   @db.ObjectId
   createdAt DateTime @default(now())
+}
+
+model OTP {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  otp       String
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  @@unique([userId])
 }

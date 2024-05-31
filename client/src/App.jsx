@@ -10,7 +10,9 @@ import ProfileUpdatePage from "./routes/profileUpdatePage/profileUpdatePage";
 import NewPostPage from "./routes/newPostPage/newPostPage";
 import ContactPage from "./routes/contactPage/contactPage";
 import { listPageLoader, profilePageLoader, singlePageLoader } from "./lib/loaders";
-import AboutSection from "./routes/Aboutus/Aboutus";
+import Aboutus from "./routes/Aboutus/Aboutus";
+import ForgotPassword from "./routes/forgotPassword/ForgotPassword.jsx";
+ //import ResetPassword from './routes/resetPassword/ResetPassword';
 
 function App() {
   const router = createBrowserRouter([
@@ -22,7 +24,6 @@ function App() {
           path: "/",
           element: <HomePage />,
         },
-        
         {
           path: "/list",
           element: <ListPage />,
@@ -34,14 +35,13 @@ function App() {
           loader: singlePageLoader,
         },
         {
-          path: "/contact", // Route for Contact Page
+          path: "/contact",
           element: <ContactPage />,
         },
         {
-          path: "/about", // Route for Contact Page
-          element: <AboutSection />,
+          path: "/about",
+          element: <Aboutus />,
         },
-      
         {
           path: "/login",
           element: <Login />,
@@ -50,6 +50,14 @@ function App() {
           path: "/register",
           element: <Register />,
         },
+        {
+          path: "/forgot-password",
+          element: <ForgotPassword />,
+        },
+        // {
+        //   path: "/reset-password",
+        //   element: <ResetPassword />,
+        // },
       ],
     },
     {
@@ -59,7 +67,7 @@ function App() {
         {
           path: "/profile",
           element: <ProfilePage />,
-          loader: profilePageLoader
+          loader: profilePageLoader,
         },
         {
           path: "/profile/update",

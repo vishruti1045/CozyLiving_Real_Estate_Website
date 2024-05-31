@@ -3,13 +3,9 @@ import "./login.scss";
 import { Link, useNavigate } from "react-router-dom";
 import apiRequest from "../../lib/apiRequest";
 import { AuthContext } from "../../context/AuthContext";
-
 import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 
 function Login() {
-  const MySwal = withReactContent(Swal);
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const { updateUser } = useContext(AuthContext);
@@ -19,7 +15,6 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
     const formData = new FormData(e.target);
 
     const username = formData.get("username");
@@ -32,17 +27,20 @@ function Login() {
       });
 
       updateUser(res.data);
-      navigate("/");
-      MySwal.fire({
-        title: <p>Login Successful!</p>,
-        icon: 'success'
+
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: "Welcome back!",
+      }).then(() => {
+        navigate("/");
       });
+
     } catch (err) {
-      setError(err.response.data.message);
-      MySwal.fire({
-        title: <p>OOPS !!</p>,
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
         text: err.response.data.message,
-        icon: 'error'
       });
     } finally {
       setIsLoading(false);
@@ -68,9 +66,9 @@ function Login() {
             required
             placeholder="Password"
           />
-          <button type="submit">Login</button>
-          {error && <span>{error}</span>}
+          <button disabled={isLoading}>Login</button>
           <Link to="/register">{"Don't"} you have an account?</Link>
+          <Link to="/forgot-password">Forgot Password?</Link> {/* Add Forgot Password Link */}
         </form>
       </div>
       <div className="imgContainer">
@@ -78,6 +76,6 @@ function Login() {
       </div>
     </div>
   );
-};
+}
 
 export default Login;
