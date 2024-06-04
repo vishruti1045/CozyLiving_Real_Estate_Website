@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -31,6 +25,7 @@ model Post {
   userId     String      @db.ObjectId
   postDetail PostDetail?
   savedPosts SavedPost[]
+  invites    Invite[] // Add this line to define the relation
 }
 
 enum Type {
@@ -63,35 +58,36 @@ model SavedPost {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
   post      Post     @relation(fields: [postId], references: [id])
-  userId    String   @unique @db.ObjectId
-  postId    String   @unique @db.ObjectId
+  userId    String   @db.ObjectId
+  postId    String   @db.ObjectId
   createdAt DateTime @default(now())
 
   @@unique([userId, postId])
 }
 
 model User {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
-  email      String      @unique
-  username   String      @unique
-  password   String
-  avatar     String?
-  createdAt  DateTime    @default(now())
-  posts      Post[]
-  savedPosts SavedPost[]
-  chats      Chat[]      @relation(fields: [chatIDs], references: [id])
-  chatIDs    String[]    @db.ObjectId
-  resetPasswordToken String?
+  id                   String      @id @default(auto()) @map("_id") @db.ObjectId
+  email                String      @unique
+  username             String      @unique
+  password             String
+  avatar               String?
+  createdAt            DateTime    @default(now())
+  posts                Post[]
+  savedPosts           SavedPost[]
+  chats                Chat[]      @relation(fields: [chatIDs], references: [id])
+  chatIDs              String[]    @db.ObjectId
+  resetPasswordToken   String?
   resetPasswordExpires DateTime?
+   notifications Notification[]
 }
 
 model Chat {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  users     User[]    @relation(fields: [userIDs], references: [id])
-  userIDs   String[]  @db.ObjectId
-  createdAt DateTime  @default(now())
-  seenBy    String[]  @db.ObjectId
-  messages  Message[]
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  users       User[]    @relation(fields: [userIDs], references: [id])
+  userIDs     String[]  @db.ObjectId
+  createdAt   DateTime  @default(now())
+  seenBy      String[]  @db.ObjectId
+  messages    Message[]
   lastMessage String?
 }
 
@@ -109,5 +105,26 @@ model OTP {
   otp       String
   userId    String   @db.ObjectId
   createdAt DateTime @default(now())
+
   @@unique([userId])
+}
+
+model Invite {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  status         String?
+  postId         String   @db.ObjectId
+  post           Post     @relation(fields: [postId], references: [id])
+  senderEmail    String
+  recipientEmail String   // Add recipientEmail field
+  message        String
+  createdAt      DateTime @default(now())
+}
+
+
+model Notification {
+   id        String   @id @default(cuid()) @map("_id")
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }

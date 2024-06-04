@@ -55,8 +55,8 @@ function App() {
           element: <ForgotPassword />,
         },
         // {
-        //   path: "/reset-password",
-        //   element: <ResetPassword />,
+        //   path: '/send-invite',
+        //   element: <InvitePage />,
         // },
       ],
     },

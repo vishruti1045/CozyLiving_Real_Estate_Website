@@ -3,8 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import nodemailer from "nodemailer";
-import jwt from "jsonwebtoken";
-import prisma from "./lib/prisma.js"; 
+import prisma from "./lib/prisma.js";
 import bcrypt from "bcrypt";
 import authRoute from "./routes/auth.route.js";
 import postRoute from "./routes/post.route.js";
@@ -25,7 +24,7 @@ app.use("/api/posts", postRoute);
 app.use("/api/test", testRoute);
 app.use("/api/chats", chatRoute);
 app.use("/api/messages", messageRoute);
-
+//app.use('/api/invites', inviteRoute);
 
 app.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
@@ -37,14 +36,12 @@ app.post("/forgot-password", async (req, res) => {
       return res.send({ Status: "User not existed" });
     }
 
-    // Check if an OTP record already exists for the user
     const existingOTP = await prisma.OTP.findFirst({
       where: { userId: user.id },
     });
 
     let otp;
     if (existingOTP) {
-      // Update the existing OTP record
       otp = otpGenerator.generate(6, {
         digits: true,
         upperCaseAlphabets: false,
@@ -57,7 +54,6 @@ app.post("/forgot-password", async (req, res) => {
         data: { otp: otp },
       });
     } else {
-      // Generate a new OTP
       otp = otpGenerator.generate(6, {
         digits: true,
         upperCaseAlphabets: false,
@@ -65,7 +61,6 @@ app.post("/forgot-password", async (req, res) => {
         specialChars: false,
       });
 
-      // Store OTP in database or cache
       await prisma.OTP.create({
         data: {
           otp: otp,
@@ -74,7 +69,6 @@ app.post("/forgot-password", async (req, res) => {
       });
     }
 
-    // Send OTP to user's email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -87,7 +81,7 @@ app.post("/forgot-password", async (req, res) => {
       from: "vishrutiparekh2005@gmail.com",
       to: email,
       subject: "Reset Password OTP",
-      html:` <p>Your OTP for resetting password is: <strong>${otp}</strong></p>`,
+      html: `<p>Your OTP for resetting password is: <strong>${otp}</strong></p>`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -103,15 +97,11 @@ app.post("/forgot-password", async (req, res) => {
     res.status(500).send({ Status: "Error", Message: "Server error" });
   }
 });
-//const bcrypt = require('bcrypt');
-//const prisma = require('@prisma/client').PrismaClient;
-//const app = require('express')();
 
 app.post("/reset-password", async (req, res) => {
   const { email, otp, newPassword } = req.body;
   console.log("Received reset password request for email:", email);
 
-  // Verify OTP
   const isValidOtp = await verifyOtp(email, otp);
   console.log("OTP verification result:", isValidOtp);
 
@@ -121,18 +111,15 @@ app.post("/reset-password", async (req, res) => {
   }
 
   try {
-    // Hash the new password
     const hash = await bcrypt.hash(newPassword, 10);
     console.log("New password hashed:", hash);
 
-    // Update user's password in the database
     await prisma.user.update({
       where: { email: email },
       data: { password: hash },
     });
     console.log("Password reset successful");
 
-    // Clear the OTP from the database
     const user = await prisma.user.findUnique({ where: { email: email } });
     if (user) {
       await prisma.OTP.deleteMany({
@@ -154,37 +141,84 @@ async function verifyOtp(email, otp) {
     });
 
     if (!user) {
-      return false; // User not found, OTP is invalid
+      return false;
     }
 
-    // Query the OTP record for the user from the database
     const otpRecord = await prisma.OTP.findFirst({
       where: {
         userId: user.id,
         otp: otp,
         createdAt: {
-          gte: new Date(Date.now() - 5 * 60 * 1000), // OTP is valid for 5 minutes
+          gte: new Date(Date.now() - 5 * 60 * 1000),
         },
       },
     });
 
     if (!otpRecord) {
-      return false; // OTP record not found or OTP expired, OTP is invalid
+      return false;
     }
 
-    return true; // OTP is valid
+    return true;
   } catch (error) {
     console.error(error);
-    return false; // Error occurred, OTP is invalid
+    return false;
   }
 }
 
+app.post('/send-invite', async (req, res) => {
+  const { email, postId } = req.body;
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: { user: true },
+    });
+
+    if (!post || !post.user) {
+      console.error("Post or user not found for postId: ${postId}");
+      return res.status(404).send({ Status: 'Error', Message: 'Post or User not found' });
+    }
+
+    const userEmail = post.user.email;
+    const emailTitle = `Request to ${post.type} your ${post.property}`;
+
+    sendEmail(userEmail, emailTitle, 'Please review the request and provide your response at your earliest convenience.');
+
+    console.log("Invite sent to: ${userEmail}");
+
+    res.send({ Status: 'Success', Message: 'Invite sent to post owner' });
+  } catch (error) {
+    console.error('Error sending invite:', error.message);
+    res.status(500).send({ Status: 'Error', Message: 'Server error' });
+  }
+});
+
+function sendEmail(to, subject, text) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "vishrutiparekh2005@gmail.com",
+      pass: "pmyb umvu gahq hdnk",
+    },
+  });
+
+  const mailOptions = {
+    from: "vishrutiparekh2005@gmail.com",
+    to: to,
+    subject: subject,
+    html: `<p>${text}</p>`,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+}
 
 app.listen(8800, () => {
   console.log("Server is running!");
 });
-
-
-
 
 export default app;
