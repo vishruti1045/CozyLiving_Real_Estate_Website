@@ -72,7 +72,7 @@ function SinglePage() {
           title: 'Invite Sent!',
           text: 'The post owner has been notified.',
           icon: 'success',
-        });
+        });fian
       } else {
         // Display error message if invite sending failed
         await MySwal.fire({
