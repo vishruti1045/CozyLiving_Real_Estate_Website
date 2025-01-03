@@ -1,4 +1,4 @@
-# Summerinternship2024_22IT087
+# Summer_Internship_2024
 
 4th Sem Summer Internship
 ## 🌟 MERN Stack Real Estate Website - Project Showcase 🌟
