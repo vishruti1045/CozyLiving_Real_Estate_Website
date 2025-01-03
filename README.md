@@ -1,7 +1,7 @@
 # Summer_Internship_2024
 
 4th Sem Summer Internship
-## 🌟 MERN Stack Real Estate Website - Project Showcase 🌟
+## 🌟 CozyLiving - Real Estate Website using MERN Stack - Project Showcase 🌟
 Welcome to my GitHub repository for the Real Estate Website Project! This project showcases the work done using the MERN stack (MongoDB, Express, React, Node.js), including practical insights and hands-on experience with full-stack web development.
 ## Project Overview
 
